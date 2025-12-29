@@ -1,12 +1,14 @@
 import React from 'react'
-import Nav from '../component/Nav.jsx';
-import home from '../assets/home1.jpg';
+import Header from '../component/Header.jsx';
+import HeroSection from '../component/HeroSection.jsx';
+import LogosSection from '../component/logos.jsx';
 
 function Home() {
   return (
     <div style={{ width: '100%', overflow: 'hidden' }}>
-      <Nav/>
-        <img src={home} className="object-cover md:object-fill w-full lg:h-full h-[50vh]" alt=""/>
+      <Header/>
+      <HeroSection/>
+      <LogosSection/>
     </div>  
   )
 }

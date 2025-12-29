@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import logo from "../assets/logo.jpg";
+import logo from "../assets/logo.jpeg";
 import google from "../assets/google.jpg";
 import { IoEyeOutline, IoEye } from "react-icons/io5";
 import { useNavigate } from 'react-router-dom';
