@@ -165,6 +165,11 @@ export const uploadLectureVideo = async (req, res) => {
   try {
     const { lectureId, courseId } = req.params
     
+    console.log('Upload video request received')
+    console.log('Lecture ID:', lectureId)
+    console.log('Course ID:', courseId)
+    console.log('File:', req.file ? req.file.filename : 'No file')
+    
     if (!req.file) {
       return res.status(400).json({ message: "No video file uploaded" })
     }
@@ -188,8 +193,11 @@ export const uploadLectureVideo = async (req, res) => {
       return res.status(403).json({ message: "Lecture does not belong to this course" })
     }
 
+    console.log('Uploading to Cloudinary...')
     // Upload to Cloudinary
-    const videoUrl = await uploadToCloudinary(req.file)
+    const videoUrl = await uploadToCloudinary(req.file, 'lms_videos')
+
+    console.log('Video uploaded successfully:', videoUrl)
 
     return res.status(200).json({ 
       message: "Video uploaded successfully",

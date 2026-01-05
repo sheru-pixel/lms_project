@@ -13,6 +13,7 @@ import EditCourse from './pages/Educator/EditCourse.jsx'
 import CreateLecture from './pages/Educator/CreateLecture.jsx'
 import EditLecture from './pages/Educator/editlectures.jsx'
 import ViewCourse from './pages/ViewCourse.jsx'
+import AllCourses from './pages/allCourse.jsx'
 import { ToastContainer } from 'react-toastify';
 import useGetCurrentUser from './customHooks/getCurrentUser.js'
 
@@ -22,6 +23,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/all-courses" element={<AllCourses />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
       <Route path='/profile' element={<Profile />} />

@@ -42,6 +42,8 @@ function Login() {
           toast.success('Login successful! Redirecting...');
           dispatch(setUserData(response.data.user));
           setLoading(false);
+          
+          // Navigate to home page for all users
           navigate('/');
         }
       } catch (error) {

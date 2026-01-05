@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { FiBook } from 'react-icons/fi'
+import { FiBook, FiArrowLeft } from 'react-icons/fi'
 import useGetCreatorCourse from '../../customHooks/getCreatorCourse'
 import '../../styles/Courses.css'
 
@@ -18,7 +18,16 @@ function Courses() {
   return (
     <div className="courses-container">
       <div className="courses-header">
-        <h1>All Created Courses</h1>
+        <div className="header-top">
+          <button 
+            className="btn-back" 
+            onClick={() => navigate('/educator/dashboard')}
+            title="Go back to dashboard"
+          >
+            <FiArrowLeft />
+          </button>
+          <h1>All Created Courses</h1>
+        </div>
         <button className="btn-create-course" onClick={() => navigate('/educator/create-course')}>
           Create Course
         </button>

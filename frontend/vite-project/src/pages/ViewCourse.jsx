@@ -1,161 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { FiArrowLeft, FiLock, FiStar, FiUsers, FiClock, FiGlobe } from 'react-icons/fi'
-
-// Demo course data
-const DEMO_COURSE = {
-  _id: '694cdb536eeea1434d0b86b3',
-  title: 'Complete HTML & Web Development Masterclass',
-  description: 'Master HTML from beginner to advanced level. Learn semantic HTML5, accessibility standards, best practices, and real-world project development.',
-  thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
-  price: 199,
-  originalPrice: 599,
-  rating: 4.8,
-  reviews: 2450,
-  videoHours: '12+ hours',
-  instructor: 'John Anderson',
-  instructorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-  category: 'Web Development',
-  level: 'Beginner to Intermediate',
-  students: 15420,
-  language: 'English',
-  lastUpdated: '2024'
-}
-
-const DEMO_REVIEWS = [
-  {
-    _id: '1',
-    userName: 'Sarah Johnson',
-    userImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-    rating: 5,
-    date: '2024-01-15',
-    title: 'Excellent course!',
-    comment: 'John is an amazing instructor! The course is well-structured and easy to follow. I learned so much in just a few weeks.'
-  },
-  {
-    _id: '2',
-    userName: 'Michael Chen',
-    userImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    rating: 4,
-    date: '2024-01-10',
-    title: 'Great content, very helpful',
-    comment: 'The projects really helped me understand the concepts better. Only wish there were more advanced topics covered.'
-  }
-]
-
-const DEMO_LECTURES = [
-  {
-    _id: '1',
-    title: 'Welcome to HTML & Getting Started',
-    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-    isPreviewfree: true,
-    duration: '12 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Introduction and course overview'
-  },
-  {
-    _id: '2',
-    title: 'HTML Document Structure & Tags',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4',
-    isPreviewfree: true,
-    duration: '28 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Learn HTML tags and document structure'
-  },
-  {
-    _id: '3',
-    title: 'Working with Text and Semantic HTML',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4',
-    isPreviewfree: false,
-    duration: '35 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Advanced text formatting'
-  },
-  {
-    _id: '4',
-    title: 'Creating Forms & Input Elements',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ElephantsDream.mp4',
-    isPreviewfree: false,
-    duration: '42 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Build professional forms'
-  },
-  {
-    _id: '5',
-    title: 'Images, Links & Navigation',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4',
-    isPreviewfree: true,
-    duration: '31 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Working with images and creating navigation menus'
-  },
-  {
-    _id: '6',
-    title: 'CSS Basics & Styling',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4',
-    isPreviewfree: false,
-    duration: '38 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Introduction to CSS styling and selectors'
-  },
-  {
-    _id: '7',
-    title: 'Responsive Design Fundamentals',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ElephantsDream.mp4',
-    isPreviewfree: false,
-    duration: '44 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Creating responsive layouts with media queries'
-  },
-  {
-    _id: '8',
-    title: 'Flexbox Layout System',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4',
-    isPreviewfree: true,
-    duration: '36 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Master Flexbox for flexible layouts'
-  },
-  {
-    _id: '9',
-    title: 'Grid Layout Mastery',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4',
-    isPreviewfree: false,
-    duration: '40 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Learn CSS Grid for complex layouts'
-  },
-  {
-    _id: '10',
-    title: 'JavaScript Fundamentals',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ElephantsDream.mp4',
-    isPreviewfree: false,
-    duration: '45 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Getting started with JavaScript basics'
-  },
-  {
-    _id: '11',
-    title: 'DOM Manipulation & Events',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/ForBiggerBlazes.mp4',
-    isPreviewfree: true,
-    duration: '39 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Interact with DOM and handle events'
-  },
-  {
-    _id: '12',
-    title: 'Project: Build a Portfolio Website',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4',
-    isPreviewfree: false,
-    duration: '52 mins',
-    courseId: '694cdb536eeea1434d0b86b3',
-    description: 'Complete real-world portfolio project'
-  }
-]
+import axios from 'axios'
+import '@fontsource/poppins'
+import '@fontsource/poppins/600.css'
+import '@fontsource/poppins/700.css'
 
 function ViewCourse() {
   const navigate = useNavigate()
+  const { courseId } = useParams()
   const [course, setCourse] = useState(null)
   const [lectures, setLectures] = useState([])
   const [loading, setLoading] = useState(true)
@@ -165,18 +18,35 @@ function ViewCourse() {
   const fetchCourseData = useCallback(async () => {
     try {
       setLoading(true)
-      // Using demo data temporarily
-      setCourse(DEMO_COURSE)
-      setLectures(DEMO_LECTURES)
-      setSelectedLectureId(DEMO_LECTURES[0]._id)
       setError('')
+
+      // Fetch course details
+      const courseResponse = await axios.get(
+        `http://localhost:3000/api/course/getcourse/${courseId}`,
+        { withCredentials: true }
+      )
+      const courseData = courseResponse.data
+      setCourse(courseData)
+
+      // Fetch lectures for this course
+      const lecturesResponse = await axios.get(
+        `http://localhost:3000/api/course/${courseId}/lectures`,
+        { withCredentials: true }
+      )
+      const lecturesData = lecturesResponse.data || []
+      setLectures(lecturesData)
+      
+      // Set first lecture as selected
+      if (lecturesData.length > 0) {
+        setSelectedLectureId(lecturesData[0]._id)
+      }
     } catch (err) {
-      setError('Failed to load course')
-      console.error('Error:', err)
+      setError('Failed to load course. Please try again.')
+      console.error('Error fetching course:', err)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [courseId])
 
   useEffect(() => {
     fetchCourseData()
@@ -630,7 +500,32 @@ function ViewCourse() {
     )
   }
 
-  const discountPercent = Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)
+  if (error) {
+    return (
+      <div style={styles.container}>
+        <div style={{ ...styles.container, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '20px' }}>
+          <p style={{ color: '#e74c3c', fontSize: '16px' }}>{error}</p>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600'
+            }}
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const discountPercent = course.originalPrice ? Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100) : 0
 
   return (
     <div className="view-course-container" style={styles.container}>
@@ -663,19 +558,23 @@ function ViewCourse() {
                 <img src={course.thumbnail} alt={course.title} style={styles.thumbnailImg} />
               </div>
               <div className="view-course-what-you-learn" style={styles.whatYouLearn}>
-                <h3 className="view-course-what-you-learn-title" style={styles.whatYouLearnTitle}>What you'll learn</h3>
+                <h3 className="view-course-what-you-learn-title" style={styles.whatYouLearnTitle}>Course Details</h3>
                 <ul className="view-course-what-you-learn-list" style={styles.whatYouLearnList}>
                   <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
-                    <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>✓</span> Master HTML5 fundamentals
+                    <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
+                    <span><strong>Category:</strong> {course.category}</span>
                   </li>
                   <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
-                    <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>✓</span> Build real-world projects
+                    <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
+                    <span><strong>Level:</strong> {course.level || 'Beginner'}</span>
                   </li>
                   <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
-                    <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>✓</span> Learn best practices
+                    <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
+                    <span><strong>Total Lectures:</strong> {lectures.length}</span>
                   </li>
                   <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
-                    <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>✓</span> Accessibility standards
+                    <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
+                    <span><strong>Published:</strong> {course.isPublished ? 'Yes' : 'No'}</span>
                   </li>
                 </ul>
               </div>
@@ -694,14 +593,14 @@ function ViewCourse() {
                       key={i}
                       size={16}
                       style={{
-                        fill: i < Math.floor(course.rating) ? '#ffa500' : '#ddd',
-                        color: i < Math.floor(course.rating) ? '#ffa500' : '#ddd'
+                        fill: i < Math.floor(course.rating || 0) ? '#ffa500' : '#ddd',
+                        color: i < Math.floor(course.rating || 0) ? '#ffa500' : '#ddd'
                       }}
                     />
                   ))}
                 </div>
                 <span className="view-course-rating-text" style={styles.ratingText}>
-                  {course.rating} rating • {course.reviews.toLocaleString()} reviews
+                  {course.rating ? `${course.rating} rating • ` : ''}{course.reviewCount ? `${course.reviewCount.toLocaleString()} reviews` : 'No ratings yet'}
                 </span>
               </div>
 
@@ -712,22 +611,22 @@ function ViewCourse() {
                     <FiUsers size={12} style={{ display: 'inline', marginRight: '4px' }} />
                     Students
                   </span>
-                  <span className="view-course-meta-value" style={styles.metaValue}>{course.students.toLocaleString()}</span>
+                  <span className="view-course-meta-value" style={styles.metaValue}>{course.enrolledStudents?.length || 0}</span>
                 </div>
                 <div className="view-course-meta-item" style={styles.metaItem}>
                   <span className="view-course-meta-label" style={styles.metaLabel}>
                     <FiClock size={12} style={{ display: 'inline', marginRight: '4px' }} />
                     Duration
                   </span>
-                  <span className="view-course-meta-value" style={styles.metaValue}>{course.videoHours}</span>
+                  <span className="view-course-meta-value" style={styles.metaValue}>{course.duration || 'N/A'}</span>
                 </div>
                 <div className="view-course-meta-item" style={styles.metaItem}>
                   <span className="view-course-meta-label" style={styles.metaLabel}>Instructor</span>
-                  <span className="view-course-meta-value" style={styles.metaValue}>{course.instructor}</span>
+                  <span className="view-course-meta-value" style={styles.metaValue}>{course.creator?.name || 'Expert Educator'}</span>
                 </div>
                 <div className="view-course-meta-item" style={styles.metaItem}>
                   <span className="view-course-meta-label" style={styles.metaLabel}>Level</span>
-                  <span className="view-course-meta-value" style={styles.metaValue}>{course.level}</span>
+                  <span className="view-course-meta-value" style={styles.metaValue}>{course.level || 'Beginner'}</span>
                 </div>
                 <div className="view-course-enroll-item" style={{
                   display: 'flex',
@@ -875,7 +774,7 @@ function ViewCourse() {
           <h2 className="view-course-reviews-title" style={styles.reviewsTitle}>Student Reviews</h2>
           
           <div className="view-course-reviews-header" style={styles.reviewsHeader}>
-            <div className="view-course-reviews-rating" style={styles.reviewsRating}>{course.rating}</div>
+            <div className="view-course-reviews-rating" style={styles.reviewsRating}>{course.rating || 'N/A'}</div>
             <div className="view-course-reviews-stats" style={styles.reviewsStats}>
               <div className="view-course-reviews-stars-small" style={styles.reviewsStarsSmall}>
                 {[...Array(5)].map((_, i) => (
@@ -883,54 +782,54 @@ function ViewCourse() {
                     key={i}
                     size={14}
                     style={{
-                      fill: i < Math.floor(course.rating) ? '#ffa500' : '#ddd',
-                      color: i < Math.floor(course.rating) ? '#ffa500' : '#ddd'
+                      fill: i < Math.floor(course.rating || 0) ? '#ffa500' : '#ddd',
+                      color: i < Math.floor(course.rating || 0) ? '#ffa500' : '#ddd'
                     }}
                   />
                 ))}
               </div>
-              <p className="view-course-reviews-count" style={styles.reviewsCount}>{course.reviews.toLocaleString()} reviews</p>
+              <p className="view-course-reviews-count" style={styles.reviewsCount}>{course.reviewCount ? `${course.reviewCount.toLocaleString()} reviews` : 'No reviews yet'}</p>
             </div>
           </div>
 
           <div className="view-course-reviews-list" style={styles.reviewsList}>
-            {DEMO_REVIEWS.map((review, idx) => (
-              <div 
-                key={review._id} 
-                className="view-course-review-item" 
-                style={{
-                  ...styles.reviewItem,
-                  ...(idx === DEMO_REVIEWS.length - 1 ? styles.reviewItemLast : {})
-                }}
-              >
-                <div className="view-course-review-header" style={styles.reviewHeader}>
-                  <img 
-                    src={review.userImage} 
-                    alt={review.userName} 
-                    className="view-course-review-user-image"
-                    style={styles.reviewUserImage}
-                  />
-                  <div className="view-course-review-user-info" style={styles.reviewUserInfo}>
-                    <p className="view-course-review-user-name" style={styles.reviewUserName}>{review.userName}</p>
-                    <p className="view-course-review-date" style={styles.reviewDate}>{new Date(review.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+            {course.reviewsList && course.reviewsList.length > 0 ? (
+              course.reviewsList.map((review, idx) => (
+                <div 
+                  key={review._id} 
+                  className="view-course-review-item" 
+                  style={{
+                    ...styles.reviewItem,
+                    ...(idx === course.reviewsList.length - 1 ? styles.reviewItemLast : {})
+                  }}
+                >
+                  <div className="view-course-review-header" style={styles.reviewHeader}>
+                    <div className="view-course-review-user-info" style={styles.reviewUserInfo}>
+                      <p className="view-course-review-user-name" style={styles.reviewUserName}>{review.userName || 'Anonymous'}</p>
+                      <p className="view-course-review-date" style={styles.reviewDate}>{new Date(review.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                    </div>
+                    <div className="view-course-review-rating" style={styles.reviewRating}>
+                      {[...Array(5)].map((_, i) => (
+                        <FiStar
+                          key={i}
+                          size={14}
+                          style={{
+                            fill: i < (review.rating || 0) ? '#ffa500' : '#ddd',
+                            color: i < (review.rating || 0) ? '#ffa500' : '#ddd'
+                          }}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className="view-course-review-rating" style={styles.reviewRating}>
-                    {[...Array(5)].map((_, i) => (
-                      <FiStar
-                        key={i}
-                        size={14}
-                        style={{
-                          fill: i < review.rating ? '#ffa500' : '#ddd',
-                          color: i < review.rating ? '#ffa500' : '#ddd'
-                        }}
-                      />
-                    ))}
-                  </div>
+                  <h4 className="view-course-review-title" style={styles.reviewTitle}>{review.title}</h4>
+                  <p className="view-course-review-comment" style={styles.reviewComment}>{review.comment}</p>
                 </div>
-                <h4 className="view-course-review-title" style={styles.reviewTitle}>{review.title}</h4>
-                <p className="view-course-review-comment" style={styles.reviewComment}>{review.comment}</p>
+              ))
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#888' }}>
+                <p style={{ fontSize: '14px', margin: 0 }}>No reviews yet. Be the first to review this course!</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

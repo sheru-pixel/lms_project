@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   AppBar,
   Toolbar,
@@ -8,16 +9,42 @@ import {
   Box,
   Container,
   InputAdornment,
+  Menu,
+  MenuItem,
+  Avatar,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import {
+  PersonOutline,
+  SchoolOutlined,
+  InfoOutlined,
+  LogoutOutlined,
+  DashboardOutlined,
+  AccountCircleOutlined,
+} from '@mui/icons-material';
 import logo from '../assets/logo.jpeg';
+import { logout } from '../redux/userSlice';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import '@fontsource/poppins';
 import '@fontsource/poppins/600.css';
 import '@fontsource/poppins/700.css';
 
 function Header() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const userData = useSelector((state) => state.user.userData);
   const [searchQuery, setSearchQuery] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const getUserInitials = (name) => {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    return parts.map((part) => part[0]).join('').toUpperCase();
+  };
 
   const handleGetStarted = () => {
     navigate('/signup');
@@ -31,6 +58,44 @@ function Header() {
     if (e.key === 'Enter') {
       console.log('Search for:', searchQuery);
       // Add search functionality here
+    }
+  };
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNavigateProfile = () => {
+    handleMenuClose();
+    navigate('/profile');
+  };
+
+  const handleNavigateMyCourses = () => {
+    handleMenuClose();
+    navigate('/educator/courses');
+  };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        'http://localhost:3000/api/auth/logout',
+        {},
+        { withCredentials: true }
+      );
+      if (response.status === 200) {
+        toast.success('Logged out successfully');
+        dispatch(logout());
+        navigate('/login');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Logout failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -180,52 +245,281 @@ function Header() {
           </Box>
 
           {/* Login Button */}
-          <Button
-            onClick={handleLogin}
-            sx={{
-              color: '#000',
-              textTransform: 'none',
-              fontSize: '15px',
-              fontWeight: 700,
-              fontFamily: 'Poppins, sans-serif',
-              borderRadius: '8px',
-              px: 2,
-              py: 0.6,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                backgroundColor: 'rgba(31, 119, 212, 0.08)',
-              },
-              ml: 1,
-            }}
-          >
-            Log In
-          </Button>
+          {!userData ? (
+            <>
+              <Button
+                onClick={handleLogin}
+                sx={{
+                  color: '#000',
+                  textTransform: 'none',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  fontFamily: 'Poppins, sans-serif',
+                  borderRadius: '8px',
+                  px: 2,
+                  py: 0.6,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    backgroundColor: 'rgba(31, 119, 212, 0.08)',
+                  },
+                  ml: 1,
+                }}
+              >
+                Log In
+              </Button>
 
-          {/* Get Started Button */}
-          <Button
-            onClick={handleGetStarted}
-            variant="contained"
-            sx={{
-              backgroundColor: '#2c3e50',
-              color: '#fff',
-              textTransform: 'none',
-              fontSize: '15px',
-              fontWeight: 600,
-              fontFamily: 'Poppins, sans-serif',
-              ml: 1.5,
-              px: 3,
-              py: 1,
-              borderRadius: '12px',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                backgroundColor: '#1a252f',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 12px rgba(44, 62, 80, 0.3)',
-              },
-            }}
-          >
-            Get Started
-          </Button>
+              {/* Get Started Button */}
+              <Button
+                onClick={handleGetStarted}
+                variant="contained"
+                sx={{
+                  backgroundColor: '#2c3e50',
+                  color: '#fff',
+                  textTransform: 'none',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  fontFamily: 'Poppins, sans-serif',
+                  ml: 1.5,
+                  px: 3,
+                  py: 1,
+                  borderRadius: '12px',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    backgroundColor: '#1a252f',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(44, 62, 80, 0.3)',
+                  },
+                }}
+              >
+                Get Started
+              </Button>
+            </>
+          ) : userData.role === 'educator' ? (
+            <>
+              {/* Role Display */}
+              <span style={{
+                color: '#1565C0',
+                fontWeight: '600',
+                fontSize: '14px',
+                marginRight: '16px',
+                padding: '6px 12px',
+                backgroundColor: '#E3F2FD',
+                borderRadius: '6px'
+              }}>
+                 Educator
+              </span>
+
+              {/* Dashboard Button */}
+              <Tooltip title="Dashboard">
+                <IconButton
+                  onClick={() => navigate('/educator/dashboard')}
+                  sx={{
+                    color: '#1565C0',
+                    backgroundColor: '#E3F2FD',
+                    fontSize: '28px',
+                    padding: '8px',
+                    '&:hover': {
+                      backgroundColor: '#BBDEFB',
+                      transform: 'scale(1.05)',
+                      transition: 'all 0.3s ease'
+                    },
+                    mr: 1,
+                  }}
+                >
+                  <DashboardOutlined sx={{ fontSize: '28px' }} />
+                </IconButton>
+              </Tooltip>
+
+              {/* Profile Menu Icon */}
+              <Tooltip title="Profile Menu">
+                <IconButton
+                  onClick={handleMenuOpen}
+                  sx={{
+                    color: '#1565C0',
+                    backgroundColor: '#E3F2FD',
+                    fontSize: '28px',
+                    padding: '8px',
+                    '&:hover': {
+                      backgroundColor: '#BBDEFB',
+                      transform: 'scale(1.05)',
+                      transition: 'all 0.3s ease'
+                    },
+                  }}
+                >
+                  <AccountCircleOutlined sx={{ fontSize: '32px' }} />
+                </IconButton>
+              </Tooltip>
+
+              {/* Profile Dropdown Menu */}
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                PaperProps={{
+                  sx: {
+                    backgroundColor: 'white',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)',
+                    borderRadius: '8px',
+                    marginTop: '8px',
+                    minWidth: '240px',
+                  },
+                }}
+              >
+                <MenuItem
+                  onClick={handleNavigateProfile}
+                  sx={{
+                    display: 'flex',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                  }}
+                >
+                  <PersonOutline sx={{ color: '#1565C0', fontSize: '20px' }} />
+                  <span style={{ fontWeight: '500', color: '#1a1a1a' }}>My Profile</span>
+                </MenuItem>
+
+                <MenuItem
+                  onClick={handleNavigateMyCourses}
+                  sx={{
+                    display: 'flex',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                  }}
+                >
+                  <SchoolOutlined sx={{ color: '#1565C0', fontSize: '20px' }} />
+                  <span style={{ fontWeight: '500', color: '#1a1a1a' }}>My Courses</span>
+                </MenuItem>
+              </Menu>
+
+              {/* Logout Button */}
+              <Tooltip title="Logout">
+                <IconButton
+                  onClick={handleLogout}
+                  disabled={loading}
+                  sx={{
+                    color: '#D32F2F',
+                    backgroundColor: '#FFEBEE',
+                    padding: '8px',
+                    '&:hover': {
+                      backgroundColor: '#FFCDD2',
+                      transform: 'scale(1.05)',
+                      transition: 'all 0.3s ease'
+                    },
+                  }}
+                >
+                  <LogoutOutlined sx={{ fontSize: '28px' }} />
+                </IconButton>
+              </Tooltip>
+            </>
+          ) : userData.role === 'student' ? (
+            <>
+              {/* Role Display */}
+              <span style={{
+                color: '#1565C0',
+                fontWeight: '600',
+                fontSize: '14px',
+                marginRight: '16px',
+                padding: '6px 12px',
+                backgroundColor: '#E3F2FD',
+                borderRadius: '6px'
+              }}>
+                 Student
+              </span>
+
+              {/* Profile Menu Icon */}
+              <Tooltip title="Profile Menu">
+                <IconButton
+                  onClick={handleMenuOpen}
+                  sx={{
+                    color: '#1565C0',
+                    backgroundColor: '#E3F2FD',
+                    fontSize: '28px',
+                    padding: '8px',
+                    '&:hover': {
+                      backgroundColor: '#BBDEFB',
+                      transform: 'scale(1.05)',
+                      transition: 'all 0.3s ease'
+                    },
+                    mr: 1,
+                  }}
+                >
+                  <AccountCircleOutlined sx={{ fontSize: '32px' }} />
+                </IconButton>
+              </Tooltip>
+
+              {/* Profile Dropdown Menu for Student */}
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                PaperProps={{
+                  sx: {
+                    backgroundColor: 'white',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)',
+                    borderRadius: '8px',
+                    marginTop: '8px',
+                    minWidth: '240px',
+                  },
+                }}
+              >
+                <MenuItem
+                  onClick={handleNavigateProfile}
+                  sx={{
+                    display: 'flex',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                  }}
+                >
+                  <PersonOutline sx={{ color: '#1565C0', fontSize: '20px' }} />
+                  <span style={{ fontWeight: '500', color: '#1a1a1a' }}>My Profile</span>
+                </MenuItem>
+              </Menu>
+
+              {/* Logout Button */}
+              <Tooltip title="Logout">
+                <IconButton
+                  onClick={handleLogout}
+                  disabled={loading}
+                  sx={{
+                    color: '#D32F2F',
+                    backgroundColor: '#FFEBEE',
+                    padding: '8px',
+                    '&:hover': {
+                      backgroundColor: '#FFCDD2',
+                      transform: 'scale(1.05)',
+                      transition: 'all 0.3s ease'
+                    },
+                  }}
+                >
+                  <LogoutOutlined sx={{ fontSize: '28px' }} />
+                </IconButton>
+              </Tooltip>
+            </>
+          ) : null}
         </Toolbar>
       </Container>
     </AppBar>

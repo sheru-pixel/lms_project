@@ -6,10 +6,12 @@ import '../../styles/EditCourse.css'
 
 const TECH_CATEGORIES = [
   'Web Development',
-  'Mobile Development',
   'Data Science',
-  'Cloud Computing',
-  'Cybersecurity'
+  'Artificial Intelligence',
+  'Cybersecurity',
+  'Cloud & DevOps',
+  'Mobile Development',
+  'Embedded Systems'
 ]
 
 const COURSE_LEVELS = [

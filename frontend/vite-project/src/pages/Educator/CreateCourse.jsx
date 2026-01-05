@@ -1,14 +1,17 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { FiArrowLeft } from 'react-icons/fi'
 import '../../styles/CreateCourseForm.css'
 
 const TECH_CATEGORIES = [
   'Web Development',
-  'Mobile Development',
   'Data Science',
-  'Cloud Computing',
-  'Cybersecurity'
+  'Artificial Intelligence',
+  'Cybersecurity',
+  'Cloud & DevOps',
+  'Mobile Development',
+  'Embedded Systems'
 ]
 
 function CreateCourse() {
@@ -63,6 +66,34 @@ function CreateCourse() {
 
   return (
     <div className="create-course-container">
+      <button 
+        onClick={() => navigate('/educator/dashboard')}
+        style={{
+          backgroundColor: '#f0f0f0',
+          color: '#333',
+          border: 'none',
+          padding: '10px 16px',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: '500',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          transition: 'background-color 0.3s ease',
+          marginLeft: '20px'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = '#e0e0e0'
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = '#f0f0f0'
+        }}
+        title="Go back to dashboard"
+      >
+        <FiArrowLeft size={18} /> Back
+      </button>
       <div className="create-course-card">
         <h1>Create New Course</h1>
         <p className="subtitle">Get started by providing basic information about your course</p>
@@ -111,7 +142,7 @@ function CreateCourse() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/educator/courses')}
+              onClick={() => navigate('/educator/dashboard')}
               className="btn-cancel"
             >
               Cancel

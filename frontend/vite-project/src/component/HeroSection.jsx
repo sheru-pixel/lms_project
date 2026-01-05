@@ -1,9 +1,11 @@
 import React from 'react';
 import { Box, Container, Typography, Button } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useNavigate } from 'react-router-dom';
 import '@fontsource/poppins';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <Box
       className="hero-container"
@@ -355,6 +357,7 @@ const HeroSection = () => {
         <Button
           className="hero-btn"
           endIcon={<ArrowForwardIcon />}
+          onClick={() => navigate('/all-courses')}
           sx={{
             backgroundColor: '#667eea',
             color: '#fff',

@@ -1,6 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { FiArrowLeft } from 'react-icons/fi'
 
 function Dashboard() {
   const userData = useSelector((state) => state.user.userData)
@@ -28,12 +29,42 @@ function Dashboard() {
       minHeight: '100vh',
       backgroundColor: '#f5f5f5',
       padding: '40px 20px',
-      fontFamily: "'Poppins', sans-serif"
+      fontFamily: "'Poppins', sans-serif",
+      marginTop: '80px'
     }}>
-      <div style={{
+    <div style={{
         maxWidth: '900px',
         margin: '0 auto'
       }}>
+        {/* Back Button */}
+        <button 
+          onClick={() => navigate('/')}
+          style={{
+            backgroundColor: '#f0f0f0',
+            color: '#333',
+            border: 'none',
+            padding: '10px 16px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '16px',
+            fontWeight: '500',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'background-color 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = '#e0e0e0'
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#f0f0f0'
+          }}
+          title="Go back to home"
+        >
+          <FiArrowLeft size={20} /> Back to Home
+        </button>
+
         {/* Header Section */}
         <div style={{
           backgroundColor: 'white',
@@ -72,7 +103,7 @@ function Dashboard() {
               color: '#1a1a1a',
               margin: '0 0 10px 0'
             }}>
-              {userData.name}
+              Welcome, {userData.name}
             </h1>
             
             <p style={{
@@ -90,7 +121,7 @@ function Dashboard() {
               margin: '10px 0 0 0',
               lineHeight: '1.6'
             }}>
-              {userData.bio || 'Welcome to your educator dashboard. Start creating courses and sharing knowledge with students.'}
+              {userData.description || 'Welcome to your educator dashboard. Start creating courses and sharing knowledge with students.'}
             </p>
           </div>
 
@@ -119,11 +150,11 @@ function Dashboard() {
               e.target.style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.3)'
             }}
           >
-             Courses
+             My Courses
           </button>
         </div>
 
-        {/* Stats Section (Optional) */}
+        {/* Stats Section */}
         <div style={{
           marginTop: '40px',
           display: 'grid',
