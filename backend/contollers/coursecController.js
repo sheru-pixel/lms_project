@@ -153,6 +153,54 @@ export const getCourseLectures=async(req,res)=>{
     }   
 }
 
+// Get courses enrolled by student
+export const getEnrolledCourses = async (req, res) => {
+    try {
+        const studentId = req.userId;
+        const courses = await Course.find({ enrolledStudents: studentId })
+            .populate('creator', 'name email role')
+            .populate('lectures');
+        
+        if (!courses || courses.length === 0) {
+            return res.status(200).json({ 
+                message: "No enrolled courses found", 
+                courses: [],
+                success: true 
+            });
+        }
+        
+        return res.status(200).json({ 
+            message: "Enrolled courses retrieved successfully",
+            courses: courses,
+            success: true 
+        });
+    } catch (error) {
+        console.error('Error getting enrolled courses:', error);
+        return res.status(500).json({ 
+            message: "Failed to get enrolled courses", 
+            error: error.message,
+            success: false 
+        });
+    }
+};
+
+// Check if course is free
+export const isCourseFree = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const course = await Course.findById(courseId);
+        
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+        
+        return res.status(200).json({ isFree: course.price === 0 || course.price === undefined });
+    } catch (error) {
+        console.error('Error checking if course is free:', error);
+        return res.status(500).json({ message: "Failed to check course", error: error.message });
+    }
+};
+
 
 
 

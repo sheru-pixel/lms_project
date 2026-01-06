@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { FiArrowLeft, FiLock, FiStar, FiUsers, FiClock, FiGlobe } from 'react-icons/fi'
 import axios from 'axios'
+import PaymentModal from '../component/PaymentModal'
 import '@fontsource/poppins'
 import '@fontsource/poppins/600.css'
 import '@fontsource/poppins/700.css'
@@ -14,6 +15,9 @@ function ViewCourse() {
   const [loading, setLoading] = useState(true)
   const [selectedLectureId, setSelectedLectureId] = useState(null)
   const [error, setError] = useState('')
+  const [isEnrolled, setIsEnrolled] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [enrollmentChecking, setEnrollmentChecking] = useState(true)
 
   const fetchCourseData = useCallback(async () => {
     try {
@@ -48,9 +52,61 @@ function ViewCourse() {
     }
   }, [courseId])
 
+  // Check enrollment status
+  const checkEnrollmentStatus = useCallback(async () => {
+    try {
+      setEnrollmentChecking(true)
+      const response = await axios.get(
+        `http://localhost:3000/api/payment/check-enrollment/${courseId}`,
+        { withCredentials: true }
+      )
+      setIsEnrolled(response.data.enrolled)
+    } catch (err) {
+      console.error('Error checking enrollment:', err)
+      setIsEnrolled(false)
+    } finally {
+      setEnrollmentChecking(false)
+    }
+  }, [courseId])
+
   useEffect(() => {
     fetchCourseData()
-  }, [fetchCourseData])
+    checkEnrollmentStatus()
+  }, [fetchCourseData, checkEnrollmentStatus])
+
+  const handlePaymentSuccess = (enrollmentId) => {
+    setIsEnrolled(true)
+    setShowPaymentModal(false)
+  }
+
+  const handleFreeEnrollment = async () => {
+    try {
+      // For free courses, create a free payment record
+      const response = await axios.post(
+        'http://localhost:3000/api/payment/initiate',
+        { courseId },
+        { withCredentials: true }
+      )
+      
+      const paymentId = response.data.paymentId
+      
+      // Auto-complete the payment for free courses
+      await axios.post(
+        'http://localhost:3000/api/payment/bkash',
+        {
+          paymentId,
+          bkashNumber: '01700000000', // Dummy number for free courses
+          bkashPin: '0000' // Dummy PIN for free courses
+        },
+        { withCredentials: true }
+      )
+      
+      setIsEnrolled(true)
+    } catch (err) {
+      console.error('Error enrolling in free course:', err)
+      alert('Failed to enroll in course. Please try again.')
+    }
+  }
 
   const selectedLecture = lectures.find(l => l._id === selectedLectureId)
 
@@ -557,27 +613,29 @@ function ViewCourse() {
               <div className="view-course-thumbnail" style={styles.thumbnail}>
                 <img src={course.thumbnail} alt={course.title} style={styles.thumbnailImg} />
               </div>
-              <div className="view-course-what-you-learn" style={styles.whatYouLearn}>
-                <h3 className="view-course-what-you-learn-title" style={styles.whatYouLearnTitle}>Course Details</h3>
-                <ul className="view-course-what-you-learn-list" style={styles.whatYouLearnList}>
-                  <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
-                    <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
-                    <span><strong>Category:</strong> {course.category}</span>
-                  </li>
-                  <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
-                    <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
-                    <span><strong>Level:</strong> {course.level || 'Beginner'}</span>
-                  </li>
-                  <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
-                    <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
-                    <span><strong>Total Lectures:</strong> {lectures.length}</span>
-                  </li>
-                  <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
-                    <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
-                    <span><strong>Published:</strong> {course.isPublished ? 'Yes' : 'No'}</span>
-                  </li>
-                </ul>
-              </div>
+              {!isEnrolled && (
+                <div className="view-course-what-you-learn" style={styles.whatYouLearn}>
+                  <h3 className="view-course-what-you-learn-title" style={styles.whatYouLearnTitle}>Course Details</h3>
+                  <ul className="view-course-what-you-learn-list" style={styles.whatYouLearnList}>
+                    <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
+                      <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
+                      <span><strong>Category:</strong> {course.category}</span>
+                    </li>
+                    <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
+                      <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
+                      <span><strong>Level:</strong> {course.level || 'Beginner'}</span>
+                    </li>
+                    <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
+                      <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
+                      <span><strong>Total Lectures:</strong> {lectures.length}</span>
+                    </li>
+                    <li className="view-course-what-you-learn-item" style={styles.whatYouLearnItem}>
+                      <span style={{ color: '#667eea', fontWeight: 'bold' }}>•</span>
+                      <span><strong>Published:</strong> {course.isPublished ? 'Yes' : 'No'}</span>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Right: Course Info */}
@@ -634,29 +692,40 @@ function ViewCourse() {
                   gap: '12px',
                   gridColumn: '1 / 3'
                 }}>
-                  <span className="view-course-enroll-price" style={{
-                    fontSize: '20px',
-                    fontWeight: '700',
-                    color: '#1a1a1a'
-                  }}>
-                    ₹{course.price}
-                  </span>
-                  <button className="view-course-enroll-btn" style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#1a1a1a',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s',
-                    whiteSpace: 'nowrap'
-                  }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#333'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#1a1a1a'}
+                  <button 
+                    className="view-course-enroll-btn" 
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: isEnrolled ? '#2ecc71' : '#1a1a1a',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      cursor: isEnrolled ? 'default' : 'pointer',
+                      transition: 'background-color 0.2s',
+                      whiteSpace: 'nowrap',
+                      opacity: enrollmentChecking ? 0.6 : 1
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isEnrolled) e.target.style.backgroundColor = '#333'
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isEnrolled) e.target.style.backgroundColor = '#1a1a1a'
+                    }}
+                    onClick={() => {
+                      if (!isEnrolled) {
+                        if (course.price > 0) {
+                          setShowPaymentModal(true)
+                        } else {
+                          // Free course enrollment
+                          handleFreeEnrollment()
+                        }
+                      }
+                    }}
+                    disabled={enrollmentChecking || isEnrolled}
                   >
-                    Enroll Now
+                    {enrollmentChecking ? 'Checking...' : isEnrolled ? 'Enrolled' : 'Enroll Now'}
                   </button>
                 </div>
               </div>
@@ -716,7 +785,7 @@ function ViewCourse() {
               <>
                 {/* Video Player */}
                 <div className="view-course-video-player" style={styles.videoPlayer}>
-                  {selectedLecture.isPreviewfree ? (
+                  {selectedLecture.isPreviewfree || isEnrolled ? (
                     <video className="view-course-video-element" controls style={styles.videoElement}>
                       <source src={selectedLecture.videoUrl} type="video/mp4" />
                       Your browser does not support the video tag.
@@ -742,16 +811,18 @@ function ViewCourse() {
                 </div>
 
                 {/* Status Message */}
-                <div className={`view-course-status-info ${selectedLecture.isPreviewfree ? 'view-course-status-info-free' : 'view-course-status-info-locked'}`} style={{
-                  ...styles.statusInfo,
-                  ...(selectedLecture.isPreviewfree ? styles.statusInfoFree : styles.statusInfoLocked)
-                }}>
-                  <p style={{ margin: 0 }}>
-                    {selectedLecture.isPreviewfree
-                      ? '✓ You can preview this lecture'
-                      : '🔒 Enroll now to access this lecture'}
-                  </p>
-                </div>
+                {!isEnrolled && (
+                  <div className={`view-course-status-info ${selectedLecture.isPreviewfree ? 'view-course-status-info-free' : 'view-course-status-info-locked'}`} style={{
+                    ...styles.statusInfo,
+                    ...(selectedLecture.isPreviewfree ? styles.statusInfoFree : styles.statusInfoLocked)
+                  }}>
+                    <p style={{ margin: 0 }}>
+                      {selectedLecture.isPreviewfree
+                        ? '✓ You can preview this lecture'
+                        : '🔒 Enroll now to access this lecture'}
+                    </p>
+                  </div>
+                )}
               </>
             ) : (
               <div className="view-course-video-placeholder" style={{
@@ -833,6 +904,16 @@ function ViewCourse() {
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        courseId={courseId}
+        courseTitle={course?.title}
+        amount={course?.price || 0}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   )
 }

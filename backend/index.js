@@ -7,6 +7,7 @@ import express from 'express';
 import authRouther from './route/authroute.js';
 import userRouter from './route/userRoute.js';
 import courseRouter from './route/courseRoute.js';
+import paymentRouter from './route/paymentRoute.js';
 import connectdb from './config/connectDb.js';  
 
 const __filename = fileURLToPath(import.meta.url);
@@ -24,6 +25,7 @@ app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use('/api/auth', authRouther);
 app.use('/api/user', userRouter);
 app.use('/api/course', courseRouter);
+app.use('/api/payment', paymentRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello World!');

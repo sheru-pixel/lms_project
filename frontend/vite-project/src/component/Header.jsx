@@ -76,7 +76,11 @@ function Header() {
 
   const handleNavigateMyCourses = () => {
     handleMenuClose();
-    navigate('/educator/courses');
+    if (userData.role === 'educator') {
+      navigate('/educator/courses');
+    } else if (userData.role === 'student') {
+      navigate('/enrolled-courses');
+    }
   };
 
   const handleLogout = async () => {
@@ -496,6 +500,21 @@ function Header() {
                 >
                   <PersonOutline sx={{ color: '#1565C0', fontSize: '20px' }} />
                   <span style={{ fontWeight: '500', color: '#1a1a1a' }}>My Profile</span>
+                </MenuItem>
+
+                <MenuItem
+                  onClick={handleNavigateMyCourses}
+                  sx={{
+                    display: 'flex',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                  }}
+                >
+                  <SchoolOutlined sx={{ color: '#1565C0', fontSize: '20px' }} />
+                  <span style={{ fontWeight: '500', color: '#1a1a1a' }}>My Courses</span>
                 </MenuItem>
               </Menu>
 

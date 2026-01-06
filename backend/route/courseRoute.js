@@ -1,6 +1,6 @@
 import express from "express"
-import isAuth from "../middleware/isAuth.js"
-import { getPublishedCourses, createCourse, getCreatorCourses, editCourse, getCourseById, removeCourse } from "../contollers/coursecController.js"
+import isAuth from "../middleware/isauth.js"
+import { getPublishedCourses, createCourse, getCreatorCourses, editCourse, getCourseById, removeCourse, getEnrolledCourses, isCourseFree } from "../contollers/coursecController.js"
 import { createLecture, getLecturesByCourse, getLectureById, editLecture, deleteLecture, uploadLectureVideo } from "../contollers/lectureController.js"
 import upload from "../middleware/multer.js"
 const courseRouter = express.Router()
@@ -9,10 +9,12 @@ const courseRouter = express.Router()
 courseRouter.post("/create", isAuth, createCourse)
 courseRouter.get("/getpublished", getPublishedCourses)
 courseRouter.get("/getcreatorcourses", isAuth, getCreatorCourses)
+courseRouter.get("/enrolled", isAuth, getEnrolledCourses)
 
 // Course detail routes
 courseRouter.post("/editcourse/:courseId", isAuth, upload.single("thumbnail"), editCourse)
 courseRouter.get("/getcourse/:courseId", getCourseById)
+courseRouter.get("/is-free/:courseId", isCourseFree)
 courseRouter.delete("/remove/:courseId", isAuth, removeCourse)
 
 // Lecture routes under course (these come after specific course routes)
