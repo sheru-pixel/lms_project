@@ -5,6 +5,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaBook, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 import { Box, CircularProgress, Button, IconButton, Tooltip } from '@mui/material';
+import ChatBot from '../component/ChatBot';
 
 function EnrolledCourses() {
   const navigate = useNavigate();
@@ -311,6 +312,7 @@ function EnrolledCourses() {
           </Box>
         )}
       </div>
+      <ChatBot courseId={null} courseName="Enrolled Courses" />
     </Box>
   );
 }

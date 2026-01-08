@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { FiArrowLeft, FiLock, FiStar, FiUsers, FiClock, FiGlobe } from 'react-icons/fi'
 import axios from 'axios'
 import PaymentModal from '../component/PaymentModal'
+import ChatBot from '../component/ChatBot'
 import '@fontsource/poppins'
 import '@fontsource/poppins/600.css'
 import '@fontsource/poppins/700.css'
@@ -914,6 +915,9 @@ function ViewCourse() {
         amount={course?.price || 0}
         onPaymentSuccess={handlePaymentSuccess}
       />
+      {isEnrolled && (
+        <ChatBot courseId={courseId} courseName={course?.title || 'Course'} />
+      )}
     </div>
   )
 }
