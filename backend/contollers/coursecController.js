@@ -85,7 +85,10 @@ export const editCourse=async(req,res)=>{
 export const getCourseById=async(req,res)=>{
     try{
         const courseId=req.params.courseId
-        const course=await Course.findById(courseId).populate('creator','name email role').populate('lectures')
+        const course=await Course.findById(courseId).populate('creator','name email role').populate('lectures').populate({
+            path: 'reviewsList',
+            select: 'userName rating comment title date user'
+        })
         if (!course){
             return res.status(404).json({message:"Course not found"})
         }

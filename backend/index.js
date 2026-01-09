@@ -9,6 +9,9 @@ import userRouter from './route/userRoute.js';
 import courseRouter from './route/courseRoute.js';
 import paymentRouter from './route/paymentRoute.js';
 import chatRouter from './route/chatRoute.js';
+import availabilityRouter from './route/availabilityRoute.js';
+import sessionRouter from './route/sessionRoute.js';
+import quizRouter from './route/quizRoute.js';
 import connectdb from './config/connectDb.js';  
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +31,9 @@ app.use('/api/user', userRouter);
 app.use('/api/course', courseRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/availability', availabilityRouter);
+app.use('/api/session', sessionRouter);
+app.use('/api/quiz', quizRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello World!');

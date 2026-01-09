@@ -12,9 +12,16 @@ import CreateCourse from './pages/Educator/CreateCourse.jsx'
 import EditCourse from './pages/Educator/EditCourse.jsx'
 import CreateLecture from './pages/Educator/CreateLecture.jsx'
 import EditLecture from './pages/Educator/editlectures.jsx'
+import EditQuiz from './pages/Educator/EditQuiz.jsx'
+import EducatorAvailability from './pages/Educator/EducatorAvailability.jsx'
+import EducatorSessionRequests from './pages/Educator/EducatorSessionRequests.jsx'
+import BookSession from './pages/BookSession.jsx'
+import MySessionRequests from './pages/MySessionRequests.jsx'
 import ViewCourse from './pages/ViewCourse.jsx'
 import AllCourses from './pages/allCourse.jsx'
 import EnrolledCourses from './pages/EnrolledCourses.jsx'
+import Career from './pages/Career.jsx'
+import BlogPost from './pages/BlogPost.jsx'
 import { ToastContainer } from 'react-toastify';
 import useGetCurrentUser from './customHooks/getCurrentUser.js'
 
@@ -26,17 +33,24 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/all-courses" element={<AllCourses />} />
       <Route path="/enrolled-courses" element={<EnrolledCourses />} />
+      <Route path="/career" element={<Career />} />
+      <Route path="/blog-post" element={<BlogPost />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
       <Route path='/profile' element={<Profile />} />
       <Route path='/edit-profile' element={<EditProfile />} />
       <Route path='/forget-password' element={<ForgetPassword />} />
+      <Route path='/session-requests' element={<MySessionRequests />} />
+      <Route path='/course/:courseId/book-session' element={<BookSession />} />
       <Route path='/educator/dashboard' element={<Dashboard />} />
       <Route path='/educator/courses' element={<Courses />} />
       <Route path='/educator/create-course' element={<CreateCourse />} />
       <Route path='/educator/edit-course/:courseId' element={<EditCourse />} />
       <Route path='/educator/course/:courseId/lectures' element={<CreateLecture />} />
       <Route path='/educator/course/:courseId/lecture/:lectureId/edit' element={<EditLecture />} />
+      <Route path='/educator/course/:courseId/quiz' element={<EditQuiz />} />
+      <Route path='/educator/availability' element={<EducatorAvailability />} />
+      <Route path='/educator/session-requests' element={<EducatorSessionRequests />} />
       <Route path='/course/:courseId' element={<ViewCourse />} />
     </Routes>
   )

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Card, CardContent, Button, Rating, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { FiArrowLeft } from 'react-icons/fi';
 import axios from 'axios';
@@ -10,10 +10,12 @@ import '@fontsource/poppins/700.css';
 
 const AllCourses = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
   const categoryColors = {
     'Web Development': '#667eea',
@@ -58,9 +60,14 @@ const AllCourses = () => {
     }
   };
 
-  const filteredCourses = activeCategory === 'all' 
-    ? courses 
-    : courses.filter(course => course.category === activeCategory);
+  const filteredCourses = courses.filter(course => {
+    const matchesCategory = activeCategory === 'all' || course.category === activeCategory;
+    const matchesSearch = !searchQuery || 
+      course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.category?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const groupedCourses = filteredCourses.reduce((acc, course) => {
     const category = course.category || 'Other';
@@ -141,7 +148,7 @@ const AllCourses = () => {
               maxWidth: '700px',
               mx: 'auto',
               textAlign: 'center',
-              mb: 3,
+              mb: 2,
               lineHeight: 1.6,
               fontWeight: 700,
               fontFamily: "'Poppins', sans-serif",
@@ -150,6 +157,24 @@ const AllCourses = () => {
           >
             Discover a comprehensive collection of courses across multiple technology domains. Learn from industry experts and master new skills to advance your career.
           </Typography>
+
+          {/* Search Results Info */}
+          {searchQuery && (
+            <Typography
+              sx={{
+                fontSize: { xs: '14px', md: '15px' },
+                color: '#667eea',
+                maxWidth: '700px',
+                mx: 'auto',
+                textAlign: 'center',
+                mb: 3,
+                fontWeight: 600,
+                fontFamily: "'Poppins', sans-serif",
+              }}
+            >
+              Search results for "<strong>{searchQuery}</strong>" ({filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''} found)
+            </Typography>
+          )}
 
           {/* Category Filter Tabs */}
           <Box

@@ -55,9 +55,16 @@ function Header() {
   };
 
   const handleSearch = (e) => {
-    if (e.key === 'Enter') {
-      console.log('Search for:', searchQuery);
-      // Add search functionality here
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/all-courses?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery('');
+    }
+  };
+
+  const handleSearchClick = () => {
+    if (searchQuery.trim()) {
+      navigate(`/all-courses?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery('');
     }
   };
 
@@ -149,8 +156,9 @@ function Header() {
               ml: 4,
             }}
           >
-            {/* Resources */}
+            {/* Career */}
             <Button
+              onClick={() => navigate('/career')}
               sx={{
                 color: '#000',
                 textTransform: 'none',
@@ -166,11 +174,12 @@ function Header() {
                 },
               }}
             >
-              Resources
+              Career
             </Button>
 
-            {/* Business */}
+            {/* Blog Post */}
             <Button
+              onClick={() => navigate('/blog-post')}
               sx={{
                 color: '#000',
                 textTransform: 'none',
@@ -186,27 +195,7 @@ function Header() {
                 },
               }}
             >
-              Business
-            </Button>
-
-            {/* Universities */}
-            <Button
-              sx={{
-                color: '#000',
-                textTransform: 'none',
-                fontSize: '15px',
-                fontWeight: 700,
-                fontFamily: 'Poppins, sans-serif',
-                borderRadius: '8px',
-                px: 1.5,
-                py: 0.5,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  backgroundColor: 'rgba(31, 119, 212, 0.08)',
-                },
-              }}
-            >
-              Universities
+              Blog Post
             </Button>
           </Box>
 
@@ -223,6 +212,23 @@ function Header() {
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon sx={{ color: '#999' }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <button
+                      onClick={handleSearchClick}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '0 8px',
+                        display: searchQuery.trim() ? 'block' : 'none',
+                      }}
+                      title="Search"
+                    >
+                      <SearchIcon sx={{ color: '#667eea', fontSize: '20px' }} />
+                    </button>
                   </InputAdornment>
                 ),
               }}

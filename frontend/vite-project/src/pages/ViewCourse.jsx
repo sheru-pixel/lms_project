@@ -4,6 +4,7 @@ import { FiArrowLeft, FiLock, FiStar, FiUsers, FiClock, FiGlobe } from 'react-ic
 import axios from 'axios'
 import PaymentModal from '../component/PaymentModal'
 import ChatBot from '../component/ChatBot'
+import QuizModal from '../component/QuizModal'
 import '@fontsource/poppins'
 import '@fontsource/poppins/600.css'
 import '@fontsource/poppins/700.css'
@@ -19,6 +20,19 @@ function ViewCourse() {
   const [isEnrolled, setIsEnrolled] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [enrollmentChecking, setEnrollmentChecking] = useState(true)
+  const [showResourceNotification, setShowResourceNotification] = useState('')
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [reviewData, setReviewData] = useState({ rating: 5, comment: '' })
+  const [submittingReview, setSubmittingReview] = useState(false)
+  const [showQuizModal, setShowQuizModal] = useState(false)
+  const [quizPassed, setQuizPassed] = useState(false)
+  const [quizScore, setQuizScore] = useState(null)
+  const [downloadingCertificate, setDownloadingCertificate] = useState(false)
+
+  const showResourceUnavailable = (resourceName) => {
+    setShowResourceNotification(resourceName)
+    setTimeout(() => setShowResourceNotification(''), 1000)
+  }
 
   const fetchCourseData = useCallback(async () => {
     try {
@@ -75,7 +89,65 @@ function ViewCourse() {
     checkEnrollmentStatus()
   }, [fetchCourseData, checkEnrollmentStatus])
 
-  const handlePaymentSuccess = (enrollmentId) => {
+  // Check quiz status when enrolled
+  useEffect(() => {
+    if (isEnrolled && courseId) {
+      checkQuizStatus()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEnrolled, courseId])
+
+  const checkQuizStatus = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/quiz/course/${courseId}/status`,
+        { withCredentials: true }
+      )
+      setQuizPassed(response.data.passed)
+      setQuizScore(response.data.score || null)
+    } catch (err) {
+      console.error('Error checking quiz status:', err)
+      setQuizPassed(false)
+    }
+  }
+
+  const handleQuizComplete = async (results) => {
+    if (results.passed) {
+      setQuizPassed(true)
+      setQuizScore(results.score)
+    }
+    setShowQuizModal(false)
+  }
+
+  const downloadCertificate = async () => {
+    try {
+      setDownloadingCertificate(true)
+      const response = await axios.get(
+        `http://localhost:3000/api/quiz/download/${courseId}`,
+        { 
+          withCredentials: true,
+          responseType: 'blob'
+        }
+      )
+      
+      // Create a blob URL and trigger download
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `certificate-${courseId}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Error downloading certificate:', err)
+      alert('Failed to download certificate. Please try again.')
+    } finally {
+      setDownloadingCertificate(false)
+    }
+  }
+
+  const handlePaymentSuccess = () => {
     setIsEnrolled(true)
     setShowPaymentModal(false)
   }
@@ -106,6 +178,38 @@ function ViewCourse() {
     } catch (err) {
       console.error('Error enrolling in free course:', err)
       alert('Failed to enroll in course. Please try again.')
+    }
+  }
+
+  const handleSubmitReview = async () => {
+    if (!reviewData.comment.trim()) {
+      alert('Please write a review comment')
+      return
+    }
+
+    setSubmittingReview(true)
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/api/course/${courseId}/review`,
+        {
+          rating: reviewData.rating,
+          comment: reviewData.comment,
+        },
+        { withCredentials: true }
+      )
+
+      if (response.status === 201 || response.status === 200) {
+        alert('Review submitted successfully!')
+        setReviewData({ rating: 5, comment: '' })
+        setShowReviewModal(false)
+        // Optionally refetch course to update ratings
+        fetchCourseData()
+      }
+    } catch (err) {
+      console.error('Error submitting review:', err)
+      alert(err.response?.data?.message || 'Failed to submit review. Please try again.')
+    } finally {
+      setSubmittingReview(false)
     }
   }
 
@@ -278,7 +382,8 @@ function ViewCourse() {
       borderRadius: '8px',
       padding: '24px',
       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-      height: '600px',
+      height: 'auto',
+      minHeight: '600px',
       overflowY: 'auto',
       scrollBehavior: 'smooth'
     },
@@ -344,9 +449,10 @@ function ViewCourse() {
       borderRadius: '8px',
       padding: '24px',
       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-      height: '600px',
+      height: 'auto',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      maxWidth: '100%'
     },
     videoPlayer: {
       backgroundColor: '#000',
@@ -359,7 +465,7 @@ function ViewCourse() {
       position: 'relative',
       marginBottom: '20px',
       boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-      flex: 1,
+      width: '100%',
       height: 'auto'
     },
     videoElement: {
@@ -582,7 +688,7 @@ function ViewCourse() {
     )
   }
 
-  const discountPercent = course.originalPrice ? Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100) : 0
+  // const discountPercent = course.originalPrice ? Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100) : 0
 
   return (
     <div className="view-course-container" style={styles.container}>
@@ -728,6 +834,62 @@ function ViewCourse() {
                   >
                     {enrollmentChecking ? 'Checking...' : isEnrolled ? 'Enrolled' : 'Enroll Now'}
                   </button>
+
+                  {isEnrolled && (
+                    <>
+                      <button
+                        style={{
+                          backgroundColor: '#667eea',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '12px 32px',
+                          fontSize: '13px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          whiteSpace: 'nowrap',
+                          marginLeft: '12px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = '#5568d3'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = '#667eea'
+                        }}
+                        onClick={() => navigate(`/course/${courseId}/book-session`)}
+                        title="Book a one-on-one session with the instructor"
+                      >
+                        📅 Book Session
+                      </button>
+
+                      <button
+                        style={{
+                          backgroundColor: '#f59e0b',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '12px 32px',
+                          fontSize: '13px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          whiteSpace: 'nowrap',
+                          marginLeft: '12px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = '#d97706'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = '#f59e0b'
+                        }}
+                        onClick={() => setShowReviewModal(true)}
+                        title="Write a review for this course"
+                      >
+                        ⭐ Add Review
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -824,6 +986,202 @@ function ViewCourse() {
                     </p>
                   </div>
                 )}
+
+                {/* Resources Section - Only show for enrolled students */}
+                {isEnrolled && selectedLecture && (
+                  <div style={{
+                    marginTop: '20px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      gap: '12px',
+                      flexWrap: 'wrap'
+                    }}>
+                      {/* Lecture Button */}
+                      {selectedLecture.lectureNotes ? (
+                        <a
+                          href={selectedLecture.lectureNotes}
+                          download
+                          style={{
+                            padding: '12px 24px',
+                            backgroundColor: '#667eea',
+                            border: 'none',
+                            borderRadius: '8px',
+                            textDecoration: 'none',
+                            color: '#fff',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            transition: 'all 0.2s',
+                            cursor: 'pointer'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#5568d3'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#667eea'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = 'none'
+                          }}
+                        >
+                          Lecture
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => showResourceUnavailable('Lecture Notes')}
+                          style={{
+                            padding: '12px 24px',
+                            backgroundColor: '#e0e0e0',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: '#666',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#d0d0d0'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#e0e0e0'
+                          }}
+                        >
+                          Lecture
+                        </button>
+                      )}
+
+                      {/* Task Button */}
+                      {selectedLecture.taskPdf ? (
+                        <a
+                          href={selectedLecture.taskPdf}
+                          download
+                          style={{
+                            padding: '12px 24px',
+                            backgroundColor: '#667eea',
+                            border: 'none',
+                            borderRadius: '8px',
+                            textDecoration: 'none',
+                            color: '#fff',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            transition: 'all 0.2s',
+                            cursor: 'pointer'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#5568d3'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#667eea'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = 'none'
+                          }}
+                        >
+                          Task
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => showResourceUnavailable('Task PDF')}
+                          style={{
+                            padding: '12px 24px',
+                            backgroundColor: '#e0e0e0',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: '#666',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#d0d0d0'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#e0e0e0'
+                          }}
+                        >
+                          Task
+                        </button>
+                      )}
+
+                      {/* Resource Button */}
+                      {selectedLecture.resources && selectedLecture.resources.length > 0 ? (
+                        <a
+                          href={selectedLecture.resources[0].url}
+                          download
+                          style={{
+                            padding: '12px 24px',
+                            backgroundColor: '#667eea',
+                            border: 'none',
+                            borderRadius: '8px',
+                            textDecoration: 'none',
+                            color: '#fff',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            transition: 'all 0.2s',
+                            cursor: 'pointer'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#5568d3'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#667eea'
+                            e.currentTarget.style.transform = 'translateY(0)'
+                            e.currentTarget.style.boxShadow = 'none'
+                          }}
+                        >
+                          Resource
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => showResourceUnavailable('Resource')}
+                          style={{
+                            padding: '12px 24px',
+                            backgroundColor: '#e0e0e0',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: '#666',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#d0d0d0'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#d0d0d0'
+                          }}
+                        >
+                          Resource
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Resource Unavailable Notification - Below buttons */}
+                    {showResourceNotification && (
+                      <div style={{
+                        padding: '12px 16px',
+                        backgroundColor: '#fff3cd',
+                        border: '1px solid #ffc107',
+                        borderRadius: '8px',
+                        color: '#856404',
+                        fontWeight: '600',
+                        fontSize: '14px',
+                        marginTop: '16px',
+                        animation: 'slideIn 0.3s ease'
+                      }}>
+                        ℹ️ {showResourceNotification} will be available soon. Please check back later.
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <div className="view-course-video-placeholder" style={{
@@ -840,6 +1198,111 @@ function ViewCourse() {
             )}
           </div>
         </div>
+
+        {/* Assessment & Certification Section */}
+        {isEnrolled && (
+          <div style={{
+            marginTop: '40px',
+            padding: '20px',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '8px',
+            border: '1px solid #dee2e6'
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '700',
+              color: '#333',
+              marginBottom: '16px'
+            }}>Assessment & Certification</h3>
+            
+            <p style={{
+              fontSize: '14px',
+              color: '#666',
+              marginBottom: '16px'
+            }}>
+              Take a 10-question quiz to test your knowledge. Score 7 out of 10 to earn a certificate!
+            </p>
+
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              flexWrap: 'wrap'
+            }}>
+              {quizPassed ? (
+                <>
+                  <div style={{
+                    padding: '12px 16px',
+                    backgroundColor: '#d4edda',
+                    border: '1px solid #c3e6cb',
+                    borderRadius: '6px',
+                    color: '#155724',
+                    fontWeight: '600',
+                    fontSize: '14px'
+                  }}>
+                    ✓ Quiz Passed - Score: {quizScore}/10
+                  </div>
+                  <button
+                    onClick={downloadCertificate}
+                    disabled={downloadingCertificate}
+                    style={{
+                      padding: '12px 24px',
+                      backgroundColor: '#28a745',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: downloadingCertificate ? 'not-allowed' : 'pointer',
+                      opacity: downloadingCertificate ? 0.6 : 1,
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!downloadingCertificate) {
+                        e.currentTarget.style.backgroundColor = '#218838'
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.3)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#28a745'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = 'none'
+                    }}
+                  >
+                    {downloadingCertificate ? 'Downloading...' : 'Download Certificate'}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowQuizModal(true)}
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#667eea',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#5568d3'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#667eea'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }}
+                >
+                  Take Quiz
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Reviews Section */}
         <div className="view-course-reviews-section" style={styles.reviewsSection}>
@@ -915,6 +1378,187 @@ function ViewCourse() {
         amount={course?.price || 0}
         onPaymentSuccess={handlePaymentSuccess}
       />
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '700',
+              color: '#1a1a1a',
+              margin: '0 0 24px 0',
+              fontFamily: 'Poppins, sans-serif'
+            }}>
+              Write a Review
+            </h2>
+
+            {/* Rating Selection */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#1a1a1a',
+                marginBottom: '12px',
+                fontFamily: 'Poppins, sans-serif'
+              }}>
+                Rating (1-5 stars)
+              </label>
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'center'
+              }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setReviewData({ ...reviewData, rating: star })}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '28px',
+                      padding: '0',
+                      opacity: star <= reviewData.rating ? 1 : 0.3,
+                      transition: 'opacity 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
+                    onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                  >
+                    ⭐
+                  </button>
+                ))}
+                <span style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  marginLeft: '8px',
+                  fontWeight: '600'
+                }}>
+                  {reviewData.rating} out of 5
+                </span>
+              </div>
+            </div>
+
+            {/* Comment Input */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#1a1a1a',
+                marginBottom: '12px',
+                fontFamily: 'Poppins, sans-serif'
+              }}>
+                Your Review (Required)
+              </label>
+              <textarea
+                value={reviewData.comment}
+                onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+                placeholder="Share your experience with this course..."
+                style={{
+                  width: '100%',
+                  minHeight: '120px',
+                  padding: '12px',
+                  fontSize: '14px',
+                  fontFamily: 'Poppins, sans-serif',
+                  border: '2px solid #e0e0e0',
+                  borderRadius: '8px',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+              />
+            </div>
+
+            {/* Buttons */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={() => {
+                  setShowReviewModal(false)
+                  setReviewData({ rating: 5, comment: '' })
+                }}
+                style={{
+                  backgroundColor: '#f0f0f0',
+                  color: '#1a1a1a',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
+                  fontFamily: 'Poppins, sans-serif'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#e0e0e0'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#f0f0f0'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReview}
+                disabled={submittingReview}
+                style={{
+                  backgroundColor: '#667eea',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px 32px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: submittingReview ? 'not-allowed' : 'pointer',
+                  transition: 'background-color 0.2s',
+                  fontFamily: 'Poppins, sans-serif',
+                  opacity: submittingReview ? 0.6 : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (!submittingReview) e.target.style.backgroundColor = '#5568d3'
+                }}
+                onMouseLeave={(e) => {
+                  if (!submittingReview) e.target.style.backgroundColor = '#667eea'
+                }}
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showQuizModal && (
+        <QuizModal 
+          courseId={courseId} 
+          onClose={() => setShowQuizModal(false)}
+          onQuizComplete={handleQuizComplete}
+        />
+      )}
+
       {isEnrolled && (
         <ChatBot courseId={courseId} courseName={course?.title || 'Course'} />
       )}

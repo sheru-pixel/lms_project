@@ -119,7 +119,7 @@ export const getLectureById = async (req, res) => {
 export const editLecture = async (req, res) => {
   try {
     const { lectureId } = req.params
-    const { title, videoUrl, isPreviewfree } = req.body
+    const { title, videoUrl, isPreviewfree, lectureNotes, taskPdf } = req.body
 
     let lecture = await Lecture.findById(lectureId)
     if (!lecture) {
@@ -130,6 +130,8 @@ export const editLecture = async (req, res) => {
     if (title !== undefined) updatedData.title = title
     if (videoUrl !== undefined) updatedData.videoUrl = videoUrl
     if (isPreviewfree !== undefined) updatedData.isPreviewfree = isPreviewfree
+    if (lectureNotes !== undefined) updatedData.lectureNotes = lectureNotes
+    if (taskPdf !== undefined) updatedData.taskPdf = taskPdf
 
     lecture = await Lecture.findByIdAndUpdate(lectureId, updatedData, { new: true })
     return res.status(200).json(lecture)
@@ -206,5 +208,171 @@ export const uploadLectureVideo = async (req, res) => {
   } catch (error) {
     console.error('Error uploading video:', error)
     return res.status(500).json({ message: "Failed to upload video", error: error.message })
+  }
+}
+
+// Upload lecture notes (PDF)
+export const uploadLectureNotes = async (req, res) => {
+  try {
+    const { lectureId, courseId } = req.params
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" })
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(lectureId)) {
+      return res.status(400).json({ message: "Invalid lecture ID" })
+    }
+
+    // Check if lecture exists
+    const lecture = await Lecture.findById(lectureId)
+    if (!lecture) {
+      return res.status(404).json({ message: "Lecture not found" })
+    }
+
+    // Upload to Cloudinary
+    const notesUrl = await uploadToCloudinary(req.file, 'lms_notes')
+
+    lecture.lectureNotes = notesUrl
+    await lecture.save()
+
+    return res.status(200).json({ 
+      message: "Lecture notes uploaded successfully",
+      lectureNotes: notesUrl
+    })
+  } catch (error) {
+    console.error('Error uploading lecture notes:', error)
+    return res.status(500).json({ message: "Failed to upload lecture notes", error: error.message })
+  }
+}
+
+// Upload task PDF
+export const uploadTaskPdf = async (req, res) => {
+  try {
+    const { lectureId, courseId } = req.params
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" })
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(lectureId)) {
+      return res.status(400).json({ message: "Invalid lecture ID" })
+    }
+
+    // Check if lecture exists
+    const lecture = await Lecture.findById(lectureId)
+    if (!lecture) {
+      return res.status(404).json({ message: "Lecture not found" })
+    }
+
+    // Upload to Cloudinary
+    const taskUrl = await uploadToCloudinary(req.file, 'lms_tasks')
+
+    lecture.taskPdf = taskUrl
+    await lecture.save()
+
+    return res.status(200).json({ 
+      message: "Task PDF uploaded successfully",
+      taskPdf: taskUrl
+    })
+  } catch (error) {
+    console.error('Error uploading task PDF:', error)
+    return res.status(500).json({ message: "Failed to upload task PDF", error: error.message })
+  }
+}
+
+// Upload resources (multiple files)
+export const uploadResource = async (req, res) => {
+  try {
+    const { lectureId, courseId } = req.params
+    const { resourceTitle } = req.body
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" })
+    }
+
+    if (!resourceTitle) {
+      return res.status(400).json({ message: "Resource title is required" })
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(lectureId)) {
+      return res.status(400).json({ message: "Invalid lecture ID" })
+    }
+
+    // Check if lecture exists
+    const lecture = await Lecture.findById(lectureId)
+    if (!lecture) {
+      return res.status(404).json({ message: "Lecture not found" })
+    }
+
+    // Upload to Cloudinary
+    const resourceUrl = await uploadToCloudinary(req.file, 'lms_resources')
+
+    // Get file extension
+    const fileExt = req.file.originalname.split('.').pop().toLowerCase()
+    const fileTypeMap = {
+      pdf: 'pdf',
+      doc: 'doc',
+      docx: 'docx',
+      xls: 'xls',
+      xlsx: 'xlsx',
+      ppt: 'ppt',
+      pptx: 'pptx',
+      zip: 'zip'
+    }
+
+    // Add resource to lecture
+    lecture.resources.push({
+      title: resourceTitle,
+      url: resourceUrl,
+      fileType: fileTypeMap[fileExt] || 'other'
+    })
+
+    await lecture.save()
+
+    return res.status(200).json({ 
+      message: "Resource uploaded successfully",
+      resource: {
+        title: resourceTitle,
+        url: resourceUrl,
+        fileType: fileTypeMap[fileExt] || 'other'
+      }
+    })
+  } catch (error) {
+    console.error('Error uploading resource:', error)
+    return res.status(500).json({ message: "Failed to upload resource", error: error.message })
+  }
+}
+
+// Delete resource
+export const deleteResource = async (req, res) => {
+  try {
+    const { lectureId, courseId, resourceIndex } = req.params
+
+    if (!mongoose.Types.ObjectId.isValid(lectureId)) {
+      return res.status(400).json({ message: "Invalid lecture ID" })
+    }
+
+    // Check if lecture exists
+    const lecture = await Lecture.findById(lectureId)
+    if (!lecture) {
+      return res.status(404).json({ message: "Lecture not found" })
+    }
+
+    // Remove resource from array
+    if (resourceIndex >= 0 && resourceIndex < lecture.resources.length) {
+      lecture.resources.splice(resourceIndex, 1)
+      await lecture.save()
+
+      return res.status(200).json({ 
+        message: "Resource deleted successfully",
+        resources: lecture.resources
+      })
+    } else {
+      return res.status(400).json({ message: "Invalid resource index" })
+    }
+  } catch (error) {
+    console.error('Error deleting resource:', error)
+    return res.status(500).json({ message: "Failed to delete resource", error: error.message })
   }
 }

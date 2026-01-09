@@ -91,25 +91,55 @@ function EnrolledCourses() {
       <div className="enrolled-courses-content" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px 20px' }}>
         {/* Header */}
         <Box className="enrolled-courses-header" sx={{ mb: 4 }}>
-          <h1
-            style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#1a1a1a',
-              marginBottom: '10px',
-            }}
-          >
-            My Enrolled Courses
-          </h1>
-          <p
-            style={{
-              fontSize: '16px',
-              color: '#666',
-              margin: '0',
-            }}
-          >
-            {enrolledCourses.length} {enrolledCourses.length === 1 ? 'course' : 'courses'} enrolled
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px' }}>
+            <div>
+              <h1
+                style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  color: '#1a1a1a',
+                  marginBottom: '10px',
+                }}
+              >
+                My Enrolled Courses
+              </h1>
+              <p
+                style={{
+                  fontSize: '16px',
+                  color: '#666',
+                  margin: '0',
+                }}
+              >
+                {enrolledCourses.length} {enrolledCourses.length === 1 ? 'course' : 'courses'} enrolled
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/session-requests')}
+              style={{
+                backgroundColor: '#667eea',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '14px',
+                transition: 'all 0.3s ease',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#5568d3'
+                e.target.style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = '#667eea'
+                e.target.style.transform = 'translateY(0)'
+              }}
+              title="View your session requests with instructors"
+            >
+              📅 My Sessions
+            </button>
+          </div>
         </Box>
 
         {/* Courses Grid */}

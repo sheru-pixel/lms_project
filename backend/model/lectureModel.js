@@ -26,6 +26,33 @@ const lectureSchema = new mongoose.Schema({
     ref: "Course",
     required: true,
   },
+  lectureNotes: {
+    type: String,
+    default: ""
+  },
+  taskPdf: {
+    type: String,
+    default: ""
+  },
+  resources: [{
+    title: {
+      type: String,
+      required: true
+    },
+    url: {
+      type: String,
+      required: true
+    },
+    fileType: {
+      type: String,
+      enum: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'other'],
+      default: 'pdf'
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, { timestamps: true });
 
 const Lecture = mongoose.model('Lecture', lectureSchema);

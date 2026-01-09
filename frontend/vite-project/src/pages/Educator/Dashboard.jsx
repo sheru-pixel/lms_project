@@ -152,6 +152,62 @@ function Dashboard() {
           >
              My Courses
           </button>
+
+          {/* Availability Button */}
+          <button
+            onClick={() => navigate('/educator/availability')}
+            style={{
+              backgroundColor: '#2196F3',
+              color: 'white',
+              border: 'none',
+              padding: '12px 30px',
+              fontSize: '16px',
+              fontWeight: '600',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#1976D2'
+              e.target.style.boxShadow = '0 6px 16px rgba(33, 150, 243, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = '#2196F3'
+              e.target.style.boxShadow = '0 4px 12px rgba(33, 150, 243, 0.3)'
+            }}
+          >
+             Manage Availability
+          </button>
+
+          {/* Session Requests Button */}
+          <button
+            onClick={() => navigate('/educator/session-requests')}
+            style={{
+              backgroundColor: '#FF9800',
+              color: 'white',
+              border: 'none',
+              padding: '12px 30px',
+              fontSize: '16px',
+              fontWeight: '600',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 12px rgba(255, 152, 0, 0.3)',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#F57C00'
+              e.target.style.boxShadow = '0 6px 16px rgba(255, 152, 0, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = '#FF9800'
+              e.target.style.boxShadow = '0 4px 12px rgba(255, 152, 0, 0.3)'
+            }}
+          >
+             Session Requests
+          </button>
         </div>
 
         {/* Stats Section */}

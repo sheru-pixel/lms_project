@@ -15,6 +15,10 @@ function Courses() {
     navigate(`/educator/edit-course/${courseId}`)
   }
 
+  const handleQuiz = (courseId) => {
+    navigate(`/educator/course/${courseId}/quiz`)
+  }
+
   return (
     <div className="courses-container">
       <div className="courses-header">
@@ -69,13 +73,30 @@ function Courses() {
                       {course.isPublished ? 'Published' : 'Draft'}
                     </span>
                   </td>
-                  <td className="action-cell">
+                  <td className="action-cell" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                     <button 
                       className="btn-edit"
                       onClick={() => handleEdit(course._id)}
                       title="Edit course"
                     >
                       ✏️
+                    </button>
+                    <button 
+                      className="btn-edit"
+                      onClick={() => handleQuiz(course._id)}
+                      title="Manage quiz"
+                      style={{
+                        backgroundColor: '#667eea',
+                        color: '#fff',
+                        fontSize: '12px',
+                        padding: '6px 12px',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontWeight: '600'
+                      }}
+                    >
+                      📝 Quiz
                     </button>
                   </td>
                 </tr>
