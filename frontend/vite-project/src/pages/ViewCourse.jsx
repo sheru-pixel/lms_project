@@ -787,7 +787,7 @@ function ViewCourse() {
                 </div>
                 <div className="view-course-meta-item" style={styles.metaItem}>
                   <span className="view-course-meta-label" style={styles.metaLabel}>Instructor</span>
-                  <span className="view-course-meta-value" style={styles.metaValue}>{course.creator?.name || 'Expert Educator'}</span>
+                  <span className="view-course-meta-value" style={styles.metaValue}>{course.educator?.name || 'Expert Educator'}</span>
                 </div>
                 <div className="view-course-meta-item" style={styles.metaItem}>
                   <span className="view-course-meta-label" style={styles.metaLabel}>Level</span>
@@ -887,6 +887,37 @@ function ViewCourse() {
                         title="Write a review for this course"
                       >
                         ⭐ Add Review
+                      </button>
+
+                      <button
+                        style={{
+                          backgroundColor: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '12px 24px',
+                          fontSize: '13px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          whiteSpace: 'nowrap',
+                          marginLeft: '12px',
+                          display: 'inline-block',
+                          zIndex: 10
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = '#059669'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = '#10b981'
+                        }}
+                        onClick={() => {
+                          console.log('Chat button clicked, navigating to /course/' + courseId + '/chat')
+                          navigate(`/course/${courseId}/chat`)
+                        }}
+                        title="Join the course community chat"
+                      >
+                        💬 Community Chat
                       </button>
                     </>
                   )}

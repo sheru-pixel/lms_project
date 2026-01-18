@@ -428,7 +428,7 @@ const AllCourses = () => {
                             fontStyle: 'italic',
                           }}
                         >
-                          Published by {course.creator?.name || 'Expert Educator'}
+                          Published by {course.educator?.name || 'Expert Educator'}
                         </Typography>
 
                         {/* Description */}

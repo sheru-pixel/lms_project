@@ -13,13 +13,13 @@ export const createQuiz = async (req, res) => {
       return res.status(400).json({ message: "Invalid course ID" })
     }
 
-    // Verify user is the course creator (educator)
+    // Verify user is the course educator
     const course = await Course.findById(courseId)
     if (!course) {
       return res.status(404).json({ message: "Course not found" })
     }
 
-    if (course.creator.toString() !== userId) {
+    if (course.educator.toString() !== userId) {
       return res.status(403).json({ message: "You don't have permission to create quiz for this course" })
     }
 
@@ -187,13 +187,13 @@ export const getCertificateStats = async (req, res) => {
       return res.status(400).json({ message: "Invalid course ID" })
     }
 
-    // Verify user is the course creator (educator)
+    // Verify user is the course educator
     const course = await Course.findById(courseId)
     if (!course) {
       return res.status(404).json({ message: "Course not found" })
     }
 
-    if (course.creator.toString() !== userId) {
+    if (course.educator.toString() !== userId) {
       return res.status(403).json({ message: "You don't have permission to view statistics for this course" })
     }
 
@@ -241,7 +241,7 @@ export const getQuizResults = async (req, res) => {
       return res.status(404).json({ message: "Course not found" })
     }
 
-    if (course.creator.toString() !== userId) {
+    if (course.educator.toString() !== userId) {
       return res.status(403).json({ message: "You don't have permission to view results for this course" })
     }
 

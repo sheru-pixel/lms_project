@@ -25,8 +25,8 @@ export const createAvailabilitySlot = async (req, res) => {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    if (course.creator.toString() !== educatorId) {
-      return res.status(403).json({ message: "Unauthorized: Not course creator" });
+    if (course.educator.toString() !== educatorId) {
+      return res.status(403).json({ message: "Unauthorized: Not course educator" });
     }
 
     const slot = await AvailabilitySlot.create({

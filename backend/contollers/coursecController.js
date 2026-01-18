@@ -12,7 +12,7 @@ export const createCourse = async (req, res) => {
       title,
       category,
       description,
-      creator: req.userId
+      educator: req.userId
     })
     return res.status(201).json(course)
   } catch (error) {
@@ -22,7 +22,7 @@ export const createCourse = async (req, res) => {
 }
 export  const getPublishedCourses=async(req,res)=>{
     try {
-        const courses= await Course.find({isPublished:true}).populate('creator', 'name email role')
+        const courses= await Course.find({isPublished:true}).populate('educator', 'name email role')
         if (!courses || courses.length===0){
             return res.status(404).json({message:"No published courses found"})
         }
@@ -34,15 +34,18 @@ export  const getPublishedCourses=async(req,res)=>{
 
 export const getCreatorCourses=async(req,res)=>{
         try {
-            const courses= await Course.find({creator:req.userId})      
+            console.log('getCreatorCourses - req.userId:', req.userId)
+            const courses= await Course.find({educator:req.userId})      
         
-        if (!courses || courses.length===0){
-            return res.status(404).json({message:"No courses found for this creator"})
-        }
-        return res.status(200).json(courses)}
+            // Debug: check all courses and their educator fields
+            const allCourses = await Course.find({})
+            console.log('All courses in DB:', allCourses.map(c => ({ id: c._id, title: c.title, educator: c.educator })))
+        
+            console.log('Found courses for this educator:', courses.length)
+            return res.status(200).json(courses)}
 
     catch (error){
-        return res.status(500).json({message:" Failed to find Creator Courses Error"})
+        return res.status(500).json({message:" Failed to find educator courses Error"})
 
     }   
     }
@@ -85,7 +88,7 @@ export const editCourse=async(req,res)=>{
 export const getCourseById=async(req,res)=>{
     try{
         const courseId=req.params.courseId
-        const course=await Course.findById(courseId).populate('creator','name email role').populate('lectures').populate({
+        const course=await Course.findById(courseId).populate('educator','name email role').populate('lectures').populate({
             path: 'reviewsList',
             select: 'userName rating comment title date user'
         })
@@ -161,7 +164,7 @@ export const getEnrolledCourses = async (req, res) => {
     try {
         const studentId = req.userId;
         const courses = await Course.find({ enrolledStudents: studentId })
-            .populate('creator', 'name email role')
+            .populate('educator', 'name email role')
             .populate('lectures');
         
         if (!courses || courses.length === 0) {

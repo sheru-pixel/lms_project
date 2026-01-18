@@ -18,6 +18,7 @@ import EducatorSessionRequests from './pages/Educator/EducatorSessionRequests.js
 import BookSession from './pages/BookSession.jsx'
 import MySessionRequests from './pages/MySessionRequests.jsx'
 import ViewCourse from './pages/ViewCourse.jsx'
+import CourseChat from './pages/CourseChat.jsx'
 import AllCourses from './pages/allCourse.jsx'
 import EnrolledCourses from './pages/EnrolledCourses.jsx'
 import Career from './pages/Career.jsx'
@@ -52,6 +53,7 @@ function App() {
       <Route path='/educator/availability' element={<EducatorAvailability />} />
       <Route path='/educator/session-requests' element={<EducatorSessionRequests />} />
       <Route path='/course/:courseId' element={<ViewCourse />} />
+      <Route path='/course/:courseId/chat' element={<CourseChat />} />
     </Routes>
   )
 }

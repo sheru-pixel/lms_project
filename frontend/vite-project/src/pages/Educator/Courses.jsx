@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { FiBook, FiArrowLeft } from 'react-icons/fi'
@@ -8,8 +8,13 @@ import '../../styles/Courses.css'
 function Courses() {
   const navigate = useNavigate()
   
-  useGetCreatorCourse()
+  const { refetch } = useGetCreatorCourse()
   const creatorCourses = useSelector(state => state.course.creatorCourses)
+  
+  // Refetch courses when component mounts (useful after creating a new course)
+  useEffect(() => {
+    refetch()
+  }, [refetch])
   
   const handleEdit = (courseId) => {
     navigate(`/educator/edit-course/${courseId}`)
@@ -17,6 +22,10 @@ function Courses() {
 
   const handleQuiz = (courseId) => {
     navigate(`/educator/course/${courseId}/quiz`)
+  }
+
+  const handleChat = (courseId) => {
+    navigate(`/course/${courseId}/chat`)
   }
 
   return (
@@ -97,6 +106,23 @@ function Courses() {
                       }}
                     >
                       📝 Quiz
+                    </button>
+                    <button 
+                      className="btn-edit"
+                      onClick={() => handleChat(course._id)}
+                      title="View community chat"
+                      style={{
+                        backgroundColor: '#50c878',
+                        color: '#fff',
+                        fontSize: '12px',
+                        padding: '6px 12px',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontWeight: '600'
+                      }}
+                    >
+                      💬 Chat
                     </button>
                   </td>
                 </tr>
