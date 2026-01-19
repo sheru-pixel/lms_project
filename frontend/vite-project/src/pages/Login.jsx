@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import logo from "../assets/logo.jpeg";
-import google from "../assets/google.jpg";
 import { IoEyeOutline, IoEye } from "react-icons/io5";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -8,6 +7,144 @@ import { ClipLoader } from 'react-spinners';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
+import { Box, Button, TextField, Typography } from '@mui/material';
+import styled from '@emotion/styled';
+
+// Import premium fonts
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/500.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+
+// Styled components for animated left panel
+const AnimatedBackground = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: 
+    linear-gradient(0deg, 
+      rgba(0, 0, 0, 0.12) 1px, 
+      transparent 1px
+    ),
+    linear-gradient(90deg, 
+      rgba(0, 0, 0, 0.12) 1px, 
+      transparent 1px
+    );
+  background-size: 50px 50px;
+  background-position: 0 0;
+  animation: gridMove 20s linear infinite;
+
+  @keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 50px; }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, transparent 48%, rgba(0, 0, 0, 0.1) 49%, rgba(0, 0, 0, 0.1) 51%, transparent 52%);
+    top: -50px;
+    left: -50px;
+    animation: floatTriangle1 15s ease-in-out infinite;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(-45deg, transparent 48%, rgba(0, 0, 0, 0.08) 49%, rgba(0, 0, 0, 0.08) 51%, transparent 52%);
+    bottom: -30px;
+    right: -30px;
+    animation: floatTriangle2 18s ease-in-out infinite;
+  }
+
+  @keyframes floatTriangle1 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(30px, 40px) rotate(180deg); }
+  }
+
+  @keyframes floatTriangle2 {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-40px, -30px) rotate(-180deg); }
+  }
+`;
+
+const GeometricShapes = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+
+  .shape {
+    position: absolute;
+    opacity: 0.15;
+  }
+
+  .circle {
+    border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+  }
+
+  .diamond {
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.1);
+    transform: rotate(45deg);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    animation: floatDiamond 12s ease-in-out infinite;
+  }
+
+  .square {
+    width: 50px;
+    height: 50px;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+    animation: floatSquare 10s ease-in-out infinite;
+  }
+
+  @keyframes floatDiamond {
+    0%, 100% { transform: rotate(45deg) translateY(0); }
+    50% { transform: rotate(45deg) translateY(30px); }
+  }
+
+  @keyframes floatSquare {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(20px); }
+  }
+
+  @keyframes floatCircle {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+  }
+`;
+
+const CenteredLogo = styled.div`
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  animation: logoFloat 4s ease-in-out infinite;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.1));
+  }
+
+  @keyframes logoFloat {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-15px) scale(1.05); }
+  }
+`;
 
 function Login() {
     const [show, setShow] = useState(false);
@@ -54,88 +191,320 @@ function Login() {
     }
   
     return (
-      <div style={{ backgroundColor: '#f5f5f5', width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0, padding: 0, fontFamily: "'Poppins', 'Segoe UI', sans-serif" }}>
-        <form style={{ width: '100%', maxWidth: '450px', height: 'auto', backgroundColor: 'white', boxShadow: '0 8px 32px rgba(0,0,0,0.08)', borderRadius: '16px', display: 'flex', overflow: 'hidden', position: 'relative' }}>
-          {/* left div */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '20px', padding: '40px 30px', fontFamily: "'Poppins', sans-serif", marginTop: '20px', marginBottom: '20px' }}>
-            <div style={{ textAlign: 'center' }}>
-              <h1 style={{ fontWeight: '700', color: '#1a1a1a', fontSize: '28px', margin: '0 0 8px 0', letterSpacing: '-0.5px' }}>Welcome Back</h1>
-              <h2 style={{ color: '#b0b0b0', fontSize: '14px', fontWeight: '500', margin: 0, letterSpacing: '0.3px' }}>Log in to your account</h2>
-            </div>
-  
+      <Box
+        sx={{
+          display: 'flex',
+          width: '100vw',
+          minHeight: '100vh',
+          margin: 0,
+          padding: 0,
+          background: '#f5f5f2',
+          fontFamily: "'Poppins', 'Segoe UI', sans-serif",
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
+        {/* Main Split Card Container */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+            width: { xs: '95%', sm: '90%', md: '1000px' },
+            maxWidth: '1100px',
+            height: 'auto',
+            minHeight: { xs: 'auto', md: '600px' },
+            background: 'white',
+            borderRadius: '20px',
+            overflow: 'hidden',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)',
+            position: 'relative',
+            zIndex: 1,
+            margin: '40px auto',
+            border: '1px solid #e0e0e0',
+          }}
+        >
+          {/* Left Panel - Animated (Hidden on Mobile) */}
+          <Box
+            sx={{
+              display: { xs: 'none', md: 'flex' },
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '60px 50px',
+              background: '#ffffff',
+              borderRadius: '20px 0 0 20px',
+              position: 'relative',
+              overflow: 'hidden',
+              borderRight: '1px solid #e0e0e0',
+            }}
+          >
+            <AnimatedBackground />
             
-  
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', maxWidth: '320px', alignItems: 'flex-start' }}>
-              <label htmlFor='email' style={{ fontWeight: '600', fontSize: '13px', color: '#1a1a1a', letterSpacing: '0.3px' }}>Email</label>
-              <input id='email' type='email' value={email} onChange={(e) => setEmail(e.target.value)} style={{ border: '1px solid #e0e0e0', width: '100%', height: '44px', fontSize: '14px', paddingLeft: '16px', borderRadius: '8px', fontFamily: "'Poppins', sans-serif", transition: 'all 0.3s', outline: 'none', boxSizing: 'border-box' }} placeholder='Your email' />
-            </div>
-  
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', maxWidth: '320px', alignItems: 'flex-start', position: 'relative' }}>
-              <label htmlFor="password" style={{ fontWeight: '600', fontSize: '13px', color: '#1a1a1a', letterSpacing: '0.3px' }}>Password</label>
-              <input
-                id='password'
-                type={show ? "text" : "password"}
+            <GeometricShapes>
+              <div className="shape circle" style={{ width: '80px', height: '80px', top: '10%', left: '15%', animation: 'floatCircle 12s ease-in-out infinite' }} />
+              <div className="shape diamond" style={{ top: '30%', right: '10%' }} />
+              <div className="shape square" style={{ bottom: '20%', left: '20%' }} />
+              <div className="shape circle" style={{ width: '60px', height: '60px', bottom: '10%', right: '15%', animation: 'floatCircle 10s ease-in-out infinite' }} />
+              <div className="shape diamond" style={{ top: '60%', left: '10%', animation: 'floatDiamond 14s ease-in-out infinite 2s' }} />
+              <div className="shape square" style={{ top: '15%', right: '20%', animation: 'floatSquare 11s ease-in-out infinite 1s' }} />
+              <div className="shape circle" style={{ width: '50px', height: '50px', top: '50%', right: '25%', animation: 'floatCircle 13s ease-in-out infinite 1.5s' }} />
+              <div className="shape diamond" style={{ bottom: '30%', right: '5%', animation: 'floatDiamond 15s ease-in-out infinite 3s' }} />
+            </GeometricShapes>
+
+            {/* Centered Logo with Animation */}
+            <CenteredLogo>
+              <img src={logo} alt="DevSkill Logo" />
+            </CenteredLogo>
+
+            {/* Left Panel Content */}
+            <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: '280px', marginTop: '30px' }}>
+              <Typography
+                sx={{
+                  fontSize: '32px',
+                  fontWeight: 700,
+                  color: '#000000',
+                  lineHeight: 1.3,
+                  marginBottom: '20px',
+                  letterSpacing: '-0.5px',
+                }}
+              >
+                Welcome Back
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: '15px',
+                  color: '#333333',
+                  fontWeight: 500,
+                  lineHeight: 1.6,
+                }}
+              >
+                Continue your learning journey and achieve your goals with our expert courses.
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Right Panel - Login Form */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: { xs: '40px 24px', sm: '50px 40px', md: '60px 50px' },
+              background: '#ffffff',
+              position: 'relative',
+              borderLeft: { xs: 'none', md: '1px solid #e0e0e0' },
+            }}
+          >
+            {/* Form Header */}
+            <Box sx={{ marginBottom: '32px' }}>
+              <Typography
+                sx={{
+                  fontSize: { xs: '24px', sm: '28px' },
+                  fontWeight: 700,
+                  color: '#000000',
+                  marginBottom: '8px',
+                  letterSpacing: '-0.5px',
+                }}
+              >
+                Log In
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: '13px',
+                  color: '#666666',
+                  fontWeight: 500,
+                }}
+              >
+                Enter your credentials to access your account
+              </Typography>
+            </Box>
+
+            {/* Email Input */}
+            <TextField
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email Address"
+              fullWidth
+              variant="outlined"
+              sx={{
+                marginBottom: '16px',
+                '& .MuiOutlinedInput-root': {
+                  fontSize: '14px',
+                  fontFamily: "'Poppins', sans-serif",
+                  fontWeight: 500,
+                  height: '48px',
+                  backgroundColor: '#f8f9fa',
+                  '& fieldset': {
+                    borderColor: '#e0e0e0',
+                    borderRadius: '10px',
+                    borderWidth: '1px',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#d0d0d0',
+                  },
+                  '&.Mui-focused': {
+                    backgroundColor: '#ffffff',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#000000',
+                    borderWidth: '2px',
+                  },
+                },
+                '& .MuiOutlinedInput-input::placeholder': {
+                  opacity: 0.6,
+                  color: '#999999',
+                },
+              }}
+            />
+
+            {/* Password Input */}
+            <Box sx={{ position: 'relative', width: '100%', marginBottom: '24px' }}>
+              <TextField
+                id="password"
+                type={show ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{ border: '1px solid #e0e0e0', width: '100%', height: '44px', fontSize: '14px', paddingLeft: '16px', paddingRight: '40px', borderRadius: '8px', fontFamily: "'Poppins', sans-serif", transition: 'all 0.3s', outline: 'none', boxSizing: 'border-box' }}
-                placeholder='Your password'
+                placeholder="Password"
+                fullWidth
+                variant="outlined"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    fontSize: '14px',
+                    fontFamily: "'Poppins', sans-serif",
+                    fontWeight: 500,
+                    height: '48px',
+                    backgroundColor: '#f8f9fa',
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
+                      borderRadius: '10px',
+                      borderWidth: '1px',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#d0d0d0',
+                    },
+                    '&.Mui-focused': {
+                      backgroundColor: '#ffffff',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#000000',
+                      borderWidth: '2px',
+                    },
+                  },
+                  '& .MuiOutlinedInput-input::placeholder': {
+                    opacity: 0.6,
+                    color: '#999999',
+                  },
+                }}
               />
-              {show ? (
-                <IoEyeOutline
-                  style={{ position: 'absolute', width: '18px', height: '18px', cursor: 'pointer', right: '12px', top: '36px', color: '#666' }}
-                  onClick={() => setShow(prev => !prev)}
-                />
-              ) : (
-                <IoEye
-                  style={{ position: 'absolute', width: '18px', height: '18px', cursor: 'pointer', right: '12px', top: '36px', color: '#666' }}
-                  onClick={() => setShow(prev => !prev)}
-                />
-              )}
-            </div>
-  
-            
-  
-            <button 
+              <Box
+                onClick={() => setShow((prev) => !prev)}
+                sx={{
+                  position: 'absolute',
+                  right: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  cursor: 'pointer',
+                  color: '#999',
+                  fontSize: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'color 0.3s ease',
+                  '&:hover': {
+                    color: '#000',
+                  }
+                }}
+              >
+                {show ? <IoEyeOutline /> : <IoEye />}
+              </Box>
+            </Box>
+
+            {/* Forgot Password Link */}
+            <Box sx={{ textAlign: 'left', marginBottom: '28px' }}>
+              <Typography
+                component="span"
+                onClick={() => navigate('/forget-password')}
+                sx={{
+                  fontSize: '13px',
+                  color: '#666666',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    color: '#000000',
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                Forgot Password?
+              </Typography>
+            </Box>
+
+            {/* Login Button */}
+            <Button
               onClick={handleLogin}
               disabled={loading}
-              style={{ width: '100%', maxWidth: '320px', height: '44px', backgroundColor: '#1a1a1a', color: 'white', cursor: loading ? 'not-allowed' : 'pointer', borderRadius: '8px', border: 'none', fontWeight: '600', fontSize: '14px', letterSpacing: '0.3px', transition: 'all 0.3s', fontFamily: "'Poppins', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: loading ? 0.7 : 1 }}
-            >{loading ? <ClipLoader color="#ffffff" size={20} /> : 'Log In'}</button>
-            <span 
-              onClick={() => navigate('/forget-password')}
-              className='text-[13px] cursor-pointer text-[#828080]'
-              style={{ cursor: 'pointer', textDecoration: 'underline', transition: 'color 0.3s' }}
-              onMouseEnter={(e) => e.target.style.color = '#1a1a1a'}
-              onMouseLeave={(e) => e.target.style.color = '#828080'}
+              fullWidth
+              sx={{
+                backgroundColor: '#000000',
+                color: '#ffffff',
+                padding: '14px 0',
+                borderRadius: '10px',
+                fontWeight: 700,
+                fontSize: '15px',
+                textTransform: 'none',
+                fontFamily: "'Poppins', sans-serif",
+                marginBottom: '16px',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                height: '50px',
+                letterSpacing: '0.5px',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                '&:hover:not(:disabled)': {
+                  backgroundColor: '#1a1a1a',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                  transform: 'translateY(-2px)',
+                },
+                '&:disabled': {
+                  backgroundColor: '#e0e0e0',
+                  color: '#999',
+                  cursor: 'not-allowed',
+                },
+              }}
             >
-              Forgot Password?
-            </span>
-            <div style={{ width: '100%', maxWidth: '320px', display: 'flex', alignItems: 'center', gap: '12px', margin: '8px 0' }}>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#e0e0e0' }}></div>
-              <div style={{ fontSize: '12px', color: '#999', fontWeight: '500', whiteSpace: 'nowrap' }}>Or continue with</div>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#e0e0e0' }}></div>
-            </div>
-  
-            <div style={{ width: '100%', maxWidth: '320px', height: '44px', border: '1.5px solid #e0e0e0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer', transition: 'all 0.3s', backgroundColor: '#f9f9f9' }}>
-              <img src={google} style={{ width: '20px', height: '20px' }} alt="google" />
-              <span style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>Google</span>
-            </div>
-  
-            <div style={{ fontSize: '13px', color: '#999', textAlign: 'center', marginTop: '30px' }}>
-              Don't have an account? <span onClick={() => navigate("/signup")} style={{ color: '#1a1a1a', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline' }}>Sign Up</span>
-            </div>
-          </div>
-  
-          {/* right div */}
-          <div style={{ width: '40%', height: 'auto', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', padding: '40px', gap: '30px' }}>
-            <img src={logo} alt="logo" style={{ width: '120px', height: 'auto', boxShadow: 'none', borderRadius: '0px' }} />
-            <div style={{ textAlign: 'center' }}>
-              <span style={{ fontSize: '24px', color: 'white', fontWeight: '700', letterSpacing: '1.5px', display: 'block', lineHeight: '1.4' }}>VIRTUAL<br />COURSES</span>
-            </div>
-          </div>
-  
-        </form>
-      </div>
+              {loading ? <ClipLoader color="#000" size={18} /> : 'LOG IN'}
+            </Button>
+
+            {/* Signup Link */}
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography sx={{ fontSize: '13px', color: '#666' }}>
+                Don't have an account?{' '}
+                <Typography
+                  component="span"
+                  onClick={() => navigate('/signup')}
+                  sx={{
+                    color: '#000000',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Sign Up
+                </Typography>
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
     );
 }
 
-export default Login
+export default Login;
